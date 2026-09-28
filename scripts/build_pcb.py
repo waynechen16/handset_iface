@@ -49,6 +49,13 @@ PLACE = {
     "R3": (40.0, 22.0, 0),
     "R4": (57.0, 30.0, 270),
     "C6": (57.0, 34.5, 270),
+    # ---- J2 pinout-select solder jumpers (top edge, right of J2)
+    "JP4": (38.0, 12.0, 0),
+    "JP3": (44.5, 12.0, 0),
+    "JP2": (51.0, 12.0, 0),
+    "JP1": (57.5, 12.0, 0),
+    "JP5": (64.0, 12.0, 0),
+    "JP6": (70.5, 12.0, 0),
     # ---- POWER (right)
     "FB1": (60.0, 40.0, 90),
     "C14": (70.0, 36.0, 0),
@@ -146,8 +153,11 @@ silk("RV1 VOL", 42.5, 51.5, 0.9)
 silk("J4 USB 5V", 66.0, 42.3, 0.9)
 silk("J2 HANDSET", 29.0, 19.5, 0.9)
 silk("RV2 GAIN", 29.0, 43.6, 0.9)
-silk("RJ9 HANDSET <-> PC AUDIO I/F  Rev A", 57.0, 7.2, 0.9)
-silk("2026-09", 57.0, 9.0, 0.8)
+silk("RJ9 HANDSET <-> PC AUDIO I/F  Rev B", 57.0, 4.6, 0.9)
+silk("2026-09", 57.0, 6.3, 0.8)
+silk("PAIR  JP1-JP4", 47.75, 14.7, 0.8)
+silk("MIC POL  JP5-JP6", 67.25, 14.7, 0.8)
+silk("1-2 = DEFAULT", 57.0, 16.5, 0.8)
 
 pcbnew.SaveBoard(OUT, brd)
 print("saved", OUT, "parts:", len(comps), "nets:", len(nets))

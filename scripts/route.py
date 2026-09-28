@@ -90,6 +90,23 @@ class Grid:
             self.novia |= dd < 0.45
             if not p["smd"]:
                 self.novia |= dd < 0.8
+        self.block_fp_copper()
+
+    def block_fp_copper(self):
+        """copper graphics inside footprints (e.g. solder-jumper bridges) -> keep-out for foreign nets"""
+        for fp in board.GetFootprints():
+            padnets = {NETID[str(p.GetNetname())] for p in fp.Pads() if str(p.GetNetname())}
+            for g in fp.GraphicalItems():
+                lay = g.GetLayer()
+                if lay not in (pcbnew.F_Cu, pcbnew.B_Cu):
+                    continue
+                L = 0 if lay == pcbnew.F_Cu else 1
+                bb = g.GetBoundingBox()
+                dd = dist_rect(tomm(bb.GetLeft()) - OX, tomm(bb.GetTop()) - OY, tomm(bb.GetRight()) - OX, tomm(bb.GetBottom()) - OY)
+                m = dd < INFL
+                o = self.own[L]
+                o[m & ~np.isin(o, list(padnets))] = -2
+                self.novia |= dd < 0.8
 
     def mark(self, L, net, m):
         o = self.own[L]
@@ -180,7 +197,15 @@ def astar(grid, net, sources, targets, anchors, max_exp=400000):
             if ng < gbest.get(nk, 1e18):
                 gbest[nk] = ng; parent[nk] = k
                 heapq.heappush(openh, (ng + h(ny, nx), ng, nk))
-        if VO[iy][ix]:
+        # no second via within 4 steps of the previous one (avoids stacked / near-coincident vias)
+        recent_via = False
+        kk = k
+        for _ in range(4):
+            pk = parent.get(kk)
+            if pk is None: break
+            if pk[0] != kk[0]: recent_via = True; break
+            kk = pk
+        if VO[iy][ix] and not recent_via:
             nk = (1 - L, iy, ix, 8)
             ng = g + VIA_COST
             if ng < gbest.get(nk, 1e18):
@@ -360,6 +385,19 @@ def add_zone(layer):
     z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
     board.Add(z)
 add_zone(pcbnew.F_Cu); add_zone(pcbnew.B_Cu)
+# no pour over the solder-jumper bridges (the unnetted bridge copper would violate zone clearance)
+for fp in board.GetFootprints():
+    if fp.GetReference().startswith("JP"):
+        bb = fp.GetBoundingBox(False, False)
+        ra = pcbnew.ZONE(board); ra.SetIsRuleArea(True); ra.SetDoNotAllowCopperPour(True)
+        ra.SetDoNotAllowTracks(False); ra.SetDoNotAllowVias(False); ra.SetDoNotAllowPads(False); ra.SetDoNotAllowFootprints(False)
+        ra.SetLayer(pcbnew.F_Cu)
+        ol = ra.Outline(); ol.NewOutline()
+        x0, y0, x1, y1 = bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom()
+        m = mm(0.2)
+        for x, y in [(x0 - m, y0 - m), (x1 + m, y0 - m), (x1 + m, y1 + m), (x0 - m, y1 + m)]:
+            ol.Append(x, y)
+        board.Add(ra)
 
 # stitching vias every ~5 mm where both layers are free
 stitch = 0

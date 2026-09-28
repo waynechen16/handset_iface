@@ -77,12 +77,8 @@ W((84, 46), (84, 50))                                      # Zobel
 R4 = R("R4", "10R", 84, 53, props=jl(V_RIGHT))
 C6 = C("C6", "47nF", 84, 59, props=jl(V_RIGHT))
 W((84, 62), (84, 63)); GND(84, 63)
-J2 = s.place("Connector", "RJ9", "J2", "RJ9 HANDSET", *P(114, 44), mirror="y", footprint=FP_RJ9,
-             props={"Reference": {"dx": 0, "dy": -12}, "Value": {"dx": 0, "dy": 11}})
 W((99, 46), (106, 46)); LBL("EAR+", 100, 46)
-W((106, 44), (100, 44)); LBL("MIC+", 100, 44)
-W((106, 40), (103, 40), (103, 36)); W((106, 42), (103, 42), (103, 40)); GND(103, 36, 180)
-TXT("J2 pin1: EAR+   pin4: EAR- (GND)\nJ2 pin2: MIC+   pin3: MIC- (GND)\n* verify handset pinout with DMM first!", 98, 59, 1.2, justify="left top")
+TXT("EAR+ -> J2 via JP1/JP2 (see PINOUT SELECT)", 98, 59, 1.2, justify="left top")
 TXT("R1/R2: L+R mix to mono\nC1: DC block", 30, 55, 1.2, justify="left top")
 TXT("R4+C6: Zobel network\nReceiver 150R: R3=47R\nReceiver 8~32R : R3=10R", 90, 53, 1.2, justify="left top")
 
@@ -183,7 +179,7 @@ BOX(132, 78, 208, 152, "NOTES      設計說明")
 TXT(
 "1. RJ9 (4P4C) pinout is NOT standardized. Measure first:\n"
 "   - receiver pair: 30~300 ohm DC; electret mic pair: diode-like (asymmetric).\n"
-"   - swap J2 pin assignment to match your handset.\n"
+"   - set JP1-JP4 (pair) and JP5-JP6 (mic polarity) to match the handset.\n"
 "2. Path A: LM386 has low output impedance, so the receiver no longer\n"
 "   loads the PC line out -> no volume drop. RV1 sets the level.\n"
 "   Gain fixed at 20 (pins 1/8 open). C5 blocks the 2.5 V DC offset.\n"
@@ -204,6 +200,52 @@ TXT(
 "   RV1 = Alps RK097 single 9 mm right-angle shaft pot.\n"
 "8. C5/C7/C14 = SMD V-chip electrolytic 6.3 mm, >= 6.3 V rating.",
  134, 80, 1.2, justify="left top")
+
+# =====================================================================
+# J2 HANDSET CONNECTOR + PINOUT SELECT (solder jumpers)
+# =====================================================================
+OFF[:] = [0, 0]
+BOX(14, 166, 132, 224, "J2 HANDSET PINOUT SELECT (solder jumpers, default = 1-2 bridged)      話筒腳位選擇跳線")
+FP_SJ3 = "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm_NumberLabels"
+def SJ(ref, x, y, val):
+    return s.place("Jumper", "SolderJumper_3_Bridged12", ref, val, *P(x, y), 90, footprint=FP_SJ3,
+                   props={"Reference": {"dx": 5.6, "dy": -0.9, "justify": "left", "_angle": 0},
+                          "Value": {"dx": 5.6, "dy": 1.9, "justify": "left", "_angle": 0}})
+def endlabel(name, x, y, side=-1):
+    """wire from a pin at (x,y) 4 units to the left and put a label (or GND) there"""
+    W((x, y), (x + 4 * side, y))
+    if name == "GND":
+        GND(x + 4 * side, y)
+    else:
+        LBL(name, x + 4 * side, y, 0)
+
+J2 = s.place("Connector", "RJ9", "J2", "RJ9 HANDSET", *P(126, 196), mirror="y", footprint=FP_RJ9,
+             props={"Reference": {"dx": 0, "dy": -12}, "Value": {"dx": 0, "dy": 11}})
+# pair-swap jumpers: common -> J2 pin ; A (pad1, default) below, B (pad3) above
+# (ref, centre y, J2 pin, pin y, jog x, net A, net B)
+for ref, yc, pin, py, xk, na, nb in [
+        ("JP4", 172, 4, 192, 117, "GND", "MB"),
+        ("JP3", 185, 3, 194, 115, "MB", "GND"),
+        ("JP2", 202, 2, 196, 111, "MA", "EAR+"),
+        ("JP1", 216, 1, 198, 113, "EAR+", "MA")]:
+    SJ(ref, 100, yc, "PAIR")
+    W((103, yc), (xk, yc), (xk, py), (118, py))
+    endlabel(na, 100, yc + 4)
+    endlabel(nb, 100, yc - 4)
+# mic polarity jumpers: common = MA / MB
+for ref, yc, com, na, nb in [("JP5", 190, "MA", "MIC+", "GND"), ("JP6", 210, "MB", "GND", "MIC+")]:
+    SJ(ref, 70, yc, "MIC POL")
+    W((73, yc), (80, yc)); LBL(com, 76, yc)
+    endlabel(na, 70, yc + 4)
+    endlabel(nb, 70, yc - 4)
+
+TXT("JP1-JP4 = PAIR select (always set all four the same way)\n"
+    "   1-2 (default): J2.1 = EAR+, J2.4 = EAR-/GND, J2.2 = MA, J2.3 = MB\n"
+    "   2-3          : J2.2 = EAR+, J2.3 = EAR-/GND, J2.1 = MA, J2.4 = MB\n"
+    "JP5-JP6 = MIC polarity (always set both the same way)\n"
+    "   1-2 (default): MA = MIC+ (hot), MB = GND\n"
+    "   2-3          : MA = GND, MB = MIC+ (hot)\n"
+    "To change: cut the 1-2 trace on the jumper, then bridge 2-3 with solder.", 18, 168, 1.2, justify="left top")
 
 s.dump("/home/claude/out/handset_iface.kicad_sch")
 open("/home/claude/out/handset_iface.kicad_pro", "w").write(
