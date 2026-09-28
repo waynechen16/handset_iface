@@ -1,0 +1,35 @@
+Ref,Value,Footprint
+C1,10uF,Capacitor_SMD:C_1206_3216Metric
+C2,100nF,Capacitor_SMD:C_0805_2012Metric
+C4,10uF,Capacitor_SMD:C_1206_3216Metric
+C5,220uF,Capacitor_SMD:CP_Elec_6.3x7.7
+C6,47nF,Capacitor_SMD:C_0805_2012Metric
+C7,100uF,Capacitor_SMD:CP_Elec_6.3x5.4
+C8,1uF,Capacitor_SMD:C_0805_2012Metric
+C9,47pF,Capacitor_SMD:C_0805_2012Metric
+C10,22uF,Capacitor_SMD:C_1206_3216Metric
+C11,10uF,Capacitor_SMD:C_1206_3216Metric
+C12,10uF,Capacitor_SMD:C_1206_3216Metric
+C13,100nF,Capacitor_SMD:C_0805_2012Metric
+C14,100uF,Capacitor_SMD:CP_Elec_6.3x5.4
+FB1,600R@100MHz,Inductor_SMD:L_0805_2012Metric
+J1,LINE OUT (from PC),Connector_Audio:Jack_3.5mm_CUI_SJ1-3523N_Horizontal
+J2,RJ9 HANDSET,Connector_RJ:RJ9_Evercom_5301-440xxx_Horizontal
+J3,LINE IN (to PC),Connector_Audio:Jack_3.5mm_CUI_SJ1-3523N_Horizontal
+J4,USB-B (5V only),Connector_USB:USB_B_Lumberg_2411_02_Horizontal
+R1,10k,Resistor_SMD:R_0805_2012Metric
+R2,10k,Resistor_SMD:R_0805_2012Metric
+R3,47R,Resistor_SMD:R_0805_2012Metric
+R4,10R,Resistor_SMD:R_0805_2012Metric
+R5,2.2k,Resistor_SMD:R_0805_2012Metric
+R6,100R,Resistor_SMD:R_0805_2012Metric
+R7,100k,Resistor_SMD:R_0805_2012Metric
+R8,10k,Resistor_SMD:R_0805_2012Metric
+R9,2.2k,Resistor_SMD:R_0805_2012Metric
+R10,100R,Resistor_SMD:R_0805_2012Metric
+R11,10k,Resistor_SMD:R_0805_2012Metric
+R12,10k,Resistor_SMD:R_0805_2012Metric
+RV1,10k VOL,Potentiometer_THT:Potentiometer_Alps_RK097_Single_Horizontal
+RV2,100k GAIN,Potentiometer_SMD:Potentiometer_Bourns_3314J_Vertical
+U1,LM386M (SOIC-8),Package_SO:SOIC-8_3.9x4.9mm_P1.27mm
+U2,MCP6022-E/SN,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm

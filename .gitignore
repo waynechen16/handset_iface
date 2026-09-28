@@ -1,0 +1,9 @@
+# KiCad temporary / per-user files
+*-backups/
+*.kicad_prl
+fp-info-cache
+*.lck
+_autosave-*
+~*.lck
+# OS
+.DS_Store
